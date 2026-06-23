@@ -3,18 +3,18 @@
 #include <conio.h>
 #include <stdlib.h>
 
-//Constantes da tela
+// Constantes da tela
 #define TELA_LARGURA 125
-#define TELA_ALTURA  25
-#define DELAY        90
+#define TELA_ALTURA 29
+#define DELAY 90
 
-//Enzo Capitani: Criação do player
+// Enzo Capitani: Criação do player
 
-#define ALTURA_PLAYER              2
-#define LARGURA_PLAYER             9
-#define VELOCIDADE_X_PLAYER        2
-#define VELOCIDADE_Y_PLAYER        1
-#define TOTAL_FRAMES_JOGADOR       3
+#define ALTURA_PLAYER 2
+#define LARGURA_PLAYER 9
+#define VELOCIDADE_X_PLAYER 2
+#define VELOCIDADE_Y_PLAYER 1
+#define TOTAL_FRAMES_JOGADOR 3
 #define VELOCIDADE_ANIMACAO_PLAYER 1 // as velocidades de animação são inversamente proporcionais ao seus defines
 
 /*
@@ -51,7 +51,7 @@ const char *PLAYER_DIREITA[TOTAL_FRAMES_JOGADOR][ALTURA_PLAYER] = {
 
 const char *(*PLAYER_SPRITE)[ALTURA_PLAYER] = PLAYER_DIREITA;
 
-//Struct do player
+// Struct do player
 typedef struct
 {
     int x, y, score, nivelOxigenio, frameAtual;
@@ -60,12 +60,12 @@ typedef struct
 
 PLAYER player;
 
-//Coisas do buffer
+// Coisas do buffer
 HANDLE hConsole;
 CHAR_INFO consoleBuffer[TELA_LARGURA * TELA_ALTURA];
 COORD bufferSize = {TELA_LARGURA, TELA_ALTURA};
 COORD bufferCoord = {0, 0};
-SMALL_RECT consoleWriteArea = {0, 0, TELA_LARGURA-1, TELA_ALTURA-1};
+SMALL_RECT consoleWriteArea = {0, 0, TELA_LARGURA - 1, TELA_ALTURA - 1};
 
 int relogioGlobal = 0;
 
@@ -75,15 +75,25 @@ void desenhaPlayer()
 {
     int frameAtualPlayer = (relogioGlobal / VELOCIDADE_ANIMACAO_PLAYER) % TOTAL_FRAMES_JOGADOR;
 
-    for(int i = 0; i < ALTURA_PLAYER; i++){
-        for(int j = 0; j < LARGURA_PLAYER; j++){
-            int indice = (player.y + i) * TELA_LARGURA + (player.x + j);
+    for (int i = 0; i < ALTURA_PLAYER; i++)
+    {
+        for (int j = 0; j < LARGURA_PLAYER; j++)
+        {
 
-            char caractere = PLAYER_SPRITE[frameAtualPlayer][i][j];
+            int posX = player.x + j;
+            int posY = player.y + i;
+            if (posX >= 0 && posX < TELA_LARGURA && posY >= 0 && posY < TELA_ALTURA)
+            {
 
-            if(caractere != ' '){
-                consoleBuffer[indice].Char.AsciiChar = caractere;
-                consoleBuffer[indice].Attributes = FOREGROUND_RED | BACKGROUND_BLUE;
+                int indice = posY * TELA_LARGURA + posX;
+
+                char caractere = PLAYER_SPRITE[frameAtualPlayer][i][j];
+
+                if (caractere != ' ')
+                {
+                    consoleBuffer[indice].Char.AsciiChar = caractere;
+                    consoleBuffer[indice].Attributes = FOREGROUND_RED | BACKGROUND_BLUE;
+                }
             }
         }
     }
@@ -91,15 +101,16 @@ void desenhaPlayer()
 
 void desenhaMapa()
 {
-    for(int i = 0; i < TELA_LARGURA*TELA_ALTURA; i++){
+    for (int i = 0; i < TELA_LARGURA * TELA_ALTURA; i++)
+    {
         consoleBuffer[i].Char.AsciiChar = ' ';
         consoleBuffer[i].Attributes = BACKGROUND_BLUE;
     }
 }
 
-//Enzo Capitani: Criação do desenhaTela();
+// Enzo Capitani: Criação do desenhaTela();
 void desenhaTela()
-{   
+{
     desenhaMapa();
     desenhaPlayer();
     WriteConsoleOutputA(hConsole, consoleBuffer, bufferSize, bufferCoord, &consoleWriteArea);
@@ -108,13 +119,22 @@ void desenhaTela()
 // ---------------------------------- Métodos de ações ----------------------------------
 
 void acoesPlayer()
-{   
+{
 
-    if(GetAsyncKeyState(VK_RIGHT)) player.x += VELOCIDADE_X_PLAYER;
-    if(GetAsyncKeyState(VK_LEFT)) player.x -= VELOCIDADE_X_PLAYER;
-    if(GetAsyncKeyState(VK_DOWN)) player.y += VELOCIDADE_X_PLAYER;
-    if(GetAsyncKeyState(VK_UP)) player.y -= VELOCIDADE_X_PLAYER;
-    
+    if (GetAsyncKeyState(VK_RIGHT))
+    {
+        player.x += VELOCIDADE_X_PLAYER;
+        PLAYER_SPRITE = PLAYER_DIREITA;
+    }
+    if (GetAsyncKeyState(VK_LEFT))
+    {
+        player.x -= VELOCIDADE_X_PLAYER;
+        PLAYER_SPRITE = PLAYER_ESQUERDA;
+    }
+    if (GetAsyncKeyState(VK_DOWN))
+        player.y += VELOCIDADE_Y_PLAYER;
+    if (GetAsyncKeyState(VK_UP))
+        player.y -= VELOCIDADE_Y_PLAYER;
 }
 
 // ---------------------------------- Métodos de atualizações ----------------------------------
@@ -122,13 +142,31 @@ void acoesPlayer()
 void updatePlayer()
 {
     acoesPlayer();
+
+    if (player.x < 0)
+    {
+        player.x = 0;
+    }
+    if (player.y < 2)
+    {
+        player.y = 2;
+    }
+    if (player.x + LARGURA_PLAYER > TELA_LARGURA)
+    {
+        player.x = TELA_LARGURA - LARGURA_PLAYER;
+    }
+    if (player.y + ALTURA_PLAYER > TELA_ALTURA - 2)
+    {
+        player.y = TELA_ALTURA - ALTURA_PLAYER - 2;
+    }
 }
 
 void update()
-{   
+{
     updatePlayer();
-    relogioGlobal++;
     desenhaTela();
+
+    relogioGlobal++;
 }
 
 // ---------------------------------- Métodos de inicializações ----------------------------------
@@ -145,14 +183,15 @@ void iniciar()
 
 // ---------------------------------- Main ----------------------------------
 
-//acho que é o main
-int main(){
+// acho que é o main
+int main()
+{
     hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    
+
     iniciar();
 
-    while(1)
-    {   
+    while (1)
+    {
         acoesPlayer();
         update();
         Sleep(DELAY);
