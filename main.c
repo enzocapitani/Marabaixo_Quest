@@ -16,6 +16,7 @@
 #define VELOCIDADE_Y_PLAYER 1
 #define TOTAL_FRAMES_JOGADOR 3
 #define VELOCIDADE_ANIMACAO_PLAYER 1 // as velocidades de animação são inversamente proporcionais ao seus defines
+#define numeroaleatorio 3
 
 /*
     Enzo Capitani: Sprites iniciais do submarino
@@ -123,7 +124,7 @@ void acoesPlayer()
 
     if (GetAsyncKeyState(VK_RIGHT))
     {
-        player.x += VELOCIDADE_X_PLAYER;
+        player.x += VELOCIDADE_X_PLAYER * 2;
         PLAYER_SPRITE = PLAYER_DIREITA;
     }
     if (GetAsyncKeyState(VK_LEFT))
@@ -135,6 +136,10 @@ void acoesPlayer()
         player.y += VELOCIDADE_Y_PLAYER;
     if (GetAsyncKeyState(VK_UP))
         player.y -= VELOCIDADE_Y_PLAYER;
+}
+
+void umaFuncaoBemLegal(){
+    printf("Aqui so faço teste foda");
 }
 
 // ---------------------------------- Métodos de atualizações ----------------------------------
@@ -189,6 +194,8 @@ int main()
     hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
     iniciar();
+    //ablabluble
+
 
     while (1)
     {
